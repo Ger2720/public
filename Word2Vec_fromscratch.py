@@ -1,4 +1,4 @@
-#Tentative de re-création du modèle word2vec uniquement à l'aide de pandas et numpy et quelques autres packages de base
+# Attempt to recreate the word2vec model using only pandas, numpy, and a few other basic packages
 import random
 import warnings
 import pandas as pd
@@ -8,9 +8,9 @@ import tqdm
 
 warnings.simplefilter("ignore", category=DeprecationWarning)
 
-#J'ai récupérer un texte sur le thème de la plage sur internet en guise de corpus d'entrainement, il est important d'avoir un texte tournant autour de même terme
-#afin d'avoir un apprentissage plus efficace. Le côté négatif est que le modèle pourra uniquement prédire les mots de textes tournant autour du même thème que le
-#corpus d'apprentissage
+# I fetched a text on the theme of the beach from the internet as a training corpus. It's important to have a text revolving around the same term
+# to have more effective learning. The downside is that the model can only predict words from texts revolving around the same theme as the
+# training corpus
 
 text = """La plage, cet espace de liberté où l'océan rencontre la terre, exerce sur nous une fascination intemporelle. 
 Enveloppée de mystère et d'émerveillement, elle évoque des souvenirs doux et offre une échappatoire aux tracas du quotidien. 
@@ -68,23 +68,20 @@ intemporelle. Laissez vos soucis s'envoler avec les mouettes qui planent au-dess
 entre vos orteils et permettez à votre esprit de s'égarer dans l'horizon infini. La plage est un cadeau précieux qui nous rappelle notre connexion profonde 
 avec la nature et nous offre un moment d'émerveillement et de renouveau."""
 
-# Conversion du texte en Série pandas afin de pouvoir lui appliquer les transformation appliquables grâce au package
 text = pd.Series(text)
 
-# Conversion en minuscules
 text = text.str.lower()
 
-# Suppression de la ponctuation grâce à une expression regex
+# Remove punctuation using a regex expression
 text = text.str.replace('[^\w\s]', '', regex=True)
 
-# Tokenisation : Conversion du texte en une liste de mots
 tokens = text.str.split()[0]
 
-# Création du vocabulaire (ensemble des mots unique dans le corpus)
+# Create vocabulary (set of unique words in the corpus)
 voc = list(set(tokens))
 
-#mapping des mots à un index (et inversement) en vue de convertir un mot en un vecteur et vise versa, cela aidera pour la
-#création des contexte et de la matrice one hot encoded
+# Map words to an index (and vice versa) to convert a word into a vector and vice versa. This will help in
+# creating the context and the one-hot encoded matrix
 word2index = {word: index for index, word in enumerate(tokens)}
 index2word = {index: word for index, word in enumerate(tokens)}
 word2index_u = {word: index for index, word in enumerate(voc)}
@@ -102,14 +99,14 @@ for key in index2word.keys():
     context_dict[key] = tuple(word for word in context_dict[key] if word != index2word[key])
 
 
-#mapping des mots à un index unique (et inversement) en vue de convertir un mot en un vecteur et vise versa
+# Map words to unique index (and vice versa) to convert a word into a vector and vice versa
 index2word_u = {index: word for index, word in enumerate(voc)}
 
 one_hot_matrix = np.zeros((len(tokens), len(voc)), dtype=int)
 for i, word in enumerate(tokens):
     one_hot_matrix[i,word2index_u[word]] = 1
 
-# Mappage des mots aux embeddings
+# Map words to embeddings
 def input(embed_etiq, context_dict, D, context_indices = None, context_unique = False):
 
     if context_unique == True :
@@ -192,7 +189,6 @@ for j in tqdm.tqdm(range(nb_iterations)):
         softmax_output = softmax(hidden_layer_output)
         losses = -np.sum(batch_one_hot * np.log(softmax_output))
 
-        # Calcul du gradient
         gradient = softmax_output - batch_one_hot
         gradient = gradient.reshape((-1, 1))
         hidden_layer_input = np.reshape(hidden_layer_input, (-1, 1))
@@ -201,13 +197,11 @@ for j in tqdm.tqdm(range(nb_iterations)):
         gradient_weight = np.dot(hidden_layer_input, gradient.T)
         gradient_bias = np.sum(gradient)
 
-        # Mettre à jour les poids de la couche cachée
         m_i_w, v_i_w, m_i_hat_w, v_i_hat_w = ADAM(i, gradient_weight, m_i_w, v_i_w)
         m_i_b, v_i_b, m_i_hat_b, v_i_hat_b = ADAM(i, gradient_bias, m_i_b, v_i_b)
         W2 -= alpha * m_i_hat_w / (np.sqrt(v_i_hat_w) + eps)
         B2 -= alpha * m_i_hat_b / (np.sqrt(v_i_hat_b) + eps)
 
-        # Calcul du gradient pour les embeddings d'entrée
         gradient_embedding = np.dot(W2, gradient)/len(context_dict[context_index])
         gradient_embedding = gradient_embedding.reshape(-1)
         m_i_e, v_i_e, m_i_hat_e, v_i_hat_e = ADAM(j, gradient_embedding, adam_context[context_index][0], adam_context[context_index][1])
@@ -282,10 +276,8 @@ text = pd.Series(test_text)
 
 text = text.str.lower()
 
-# Suppression de la ponctuation
 text = text.str.replace('[^\w\s]', '', regex=True)
 
-# Tokenisation : Conversion du texte en une liste de mots
 tokens = text.str.split()[0]
 voc_vali = list(set(tokens))
 #mapping des mots à un index (et inversement) en vue de convertir un mot en un vecteur et vise versa
