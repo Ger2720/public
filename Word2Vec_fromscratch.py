@@ -1,9 +1,7 @@
-<<<<<<< HEAD
 #Tentative de re-création du modèle word2vec uniquement à l'aide de pandas et numpy et quelques autres packages de base
 
 =======
 # Attempt to recreate the word2vec model using only pandas, numpy, and a few other basic packages
->>>>>>> 8dd885f46119c6f01010742e87e38095cb9ba2f8
 import random
 import warnings
 import pandas as pd
