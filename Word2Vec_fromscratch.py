@@ -1,6 +1,5 @@
 #Tentative de re-création du modèle word2vec uniquement à l'aide de pandas et numpy et quelques autres packages de base
 
-=======
 # Attempt to recreate the word2vec model using only pandas, numpy, and a few other basic packages
 import random
 import warnings
@@ -150,7 +149,6 @@ def input(embed_etiq, context_dict, D, context_indices = None, context_unique = 
 
     else :
         input = np.zeros((D, len(context_dict)))
-        # Calcul de la moyenne des embeddings pour chaque contexte
         for i, words in enumerate(context_dict.values()):
             matrix = np.zeros((D, len(words)))
 
@@ -163,7 +161,6 @@ def input(embed_etiq, context_dict, D, context_indices = None, context_unique = 
     return input.T
 
 def position_coef(target_word_index, len_tokens, context):
-    # Si le mot cible est proche du début ou de la fin du corpus, ajuster le contexte
 
     if target_word_index < len(context) // 2:
         target_position = target_word_index
@@ -175,12 +172,10 @@ def position_coef(target_word_index, len_tokens, context):
         target_position = len(context) // 2
 
 
-    # Fonction pour calculer le coefficient de position
     def compute_coef(distance):
         return 1 / (1 + np.log(1 + distance))
 
 
-    # Créer un dictionnaire pour stocker les coefficients de position
     dct_word_pos_coef = {}
 
     for word in context:
@@ -190,7 +185,6 @@ def position_coef(target_word_index, len_tokens, context):
                 indices[i] += 1
 
 
-        # Si le mot apparaît plusieurs fois dans le contexte
         if len(indices) > 1:
             coefs = []
             for idx in indices:
@@ -208,7 +202,7 @@ position_coef(76, 1300, ['le', 'lapin', 'mange', 'pommes', 'dans', 'le', 'jardin
 
 def softmax(x):
     if len(x.shape) == 1:
-        e_x = np.exp(x - np.max(x)) # Soustraire le max pour des raisons de stabilité numérique
+        e_x = np.exp(x - np.max(x))
         output = e_x / np.sum(e_x)
     else:
         e_x = np.exp(x - np.max(x, axis=1, keepdims= True))
@@ -262,7 +256,6 @@ for j in tqdm.tqdm(range(nb_iterations)):
         batch_one_hot = one_hot_matrix[context_index]
         hidden_layer_input = input(embed_etiq, context_dict, D, context_index, context_unique= True)
 
-        # Forward pass
         hidden_layer_output = np.matmul(hidden_layer_input, W2) + B2
         softmax_output = softmax(hidden_layer_output)
 
@@ -272,7 +265,6 @@ for j in tqdm.tqdm(range(nb_iterations)):
         gradient = gradient.reshape((-1, 1))
         hidden_layer_input = np.reshape(hidden_layer_input, (-1, 1))
 
-        # Backward pass
         gradient_weight = np.dot(hidden_layer_input, gradient.T)
         gradient_bias = np.sum(gradient)
 
@@ -287,10 +279,8 @@ for j in tqdm.tqdm(range(nb_iterations)):
 
         for word in context_dict[context_index]:
             gradient_accumulator[word] = alpha * (m_i_hat_e / (np.sqrt(v_i_hat_e) + eps)) * position_coef(context_index, len(tokens), list(context_dict[context_index]))[word]
-        # Mettre à jour les embeddings pour chaque mot dans le contexte
         for word in context_dict[context_index]:
             embed_etiq[word] -= gradient_accumulator[word]
-        # Stocker les valeurs de l'optimiseur ADAM pour embeddings
         adam_context[context_index] = [m_i_e, v_i_e]
 
 
@@ -333,111 +323,6 @@ def testsurtrain(tokens, embed_etiq, context_dict, D, W2, B2, index2word_u):
 
 testsurtrain(tokens, embed_etiq, context_dict, D, W2, B2, index2word_u)
 
-
-arr = np.array([0, 1, 1, 0])
-
-
-def minMoves(arr):
-    # Write your code here
-    last_index_arr = len(arr) - 1
-    ones_indexes = sorted([index for index, value in enumerate(arr) if value == 1], reverse=True)
-    print(ones_indexes)
-    i = O
-    for index in ones_indexes:
-        if i == 0
-
-        swaps += last_index_arr - index
-    ones = 0
-    swaps = 0
-
-    for num in arr:
-        swaps =
-        if num == 1:
-            ones += 1
-        else:
-            swaps += ones
-    return swaps
-
-
-
-
-def swaps_num(arr):
-    ones_indexes_left = sorted([index for index, value in enumerate(arr) if value ==1])
-    swaps_left = 0
-    len_arr = len(arr)
-    for i, index in enumerate(ones_indexes_left):
-        if index == 0:
-            continue
-        else:
-            swaps_left += index - i
-
-    swaps_right = 0
-    ones_indexes_right = sorted([index for index, value in enumerate(arr) if value == 1], reverse= True)
-    for i, index in enumerate(ones_indexes_right):
-        if index == len(arr) - 1:
-            continue
-        else:
-            swaps_right += len(arr) - 1 - index - i
-    return min(swaps_left, swaps_right)
-
-
-swaps_num([0, 1, 1, 0, 1, 0, 1, 1, 1])
-
-def swaps_num2(arr):
-    zero_count_left = 0
-    swaps_left = 0
-    for element in arr:
-        if element == 0:
-            zero_count_left += 1
-        else:
-            swaps_left += zero_count_left
-
-    reversed_array = arr[::-1]
-    zero_count_right = 0
-    swaps_right = 0
-    for element in reversed_array:
-        if element == 0:
-            zero_count_right += 1
-        else:
-            swaps_right += zero_count_right
-
-    return min(swaps_left, swaps_right)
-
-swaps_num2([0, 1, 1, 0, 1, 0, 1, 1, 1])
-
-import random
-
-
-def generate_binary_list(list_size):
-    """
-    Génère une liste de taille list_size, remplie de 0 et 1 aléatoirement.
-
-    :param list_size: Taille de la liste à générer.
-    :type list_size: int
-    :return: Liste de 0 et 1
-    :rtype: list of int
-    """
-    return [random.choice([0, 1]) for _ in range(list_size)]
-
-
-# Exemple d'utilisation :
-binary_list = generate_binary_list(150000000)
-
-import time
-
-time_start = time.time()
-swaps_num(binary_list)
-total_time1 = time.time() - time_start
-print(total_time1)
-
-time_start = time.time()
-swaps_num2(binary_list)
-total_time2 = time.time() - time_start
-
-print(total_time2)
-
-assert swaps_num(binary_list) == swaps_num2(binary_list)
-
 #Test
 
 test_text = """Elle nous rappelle notre lien indissoluble avec la nature et éveille nos sens à l'émerveillement devant sa beauté infinie. 
@@ -472,7 +357,6 @@ text = text.str.replace('[^\w\s]', '', regex=True)
 
 tokens = text.str.split()[0]
 voc_vali = list(set(tokens))
-#mapping des mots à un index (et inversement) en vue de convertir un mot en un vecteur et vise versa
 word2index = {word: index for index, word in enumerate(tokens)}
 index2word = {index: word for index, word in enumerate(tokens)}
 word2index_u1 = {word: index for index, word in enumerate(voc_vali)}
@@ -510,7 +394,6 @@ for words in context_dict.values():
 
 input_matrix = np.zeros((D, len(context_dict)))
 
-    # Calcul de la moyenne des embeddings pour chaque contexte
 for i, words in enumerate(context_dict.values()):
 
     matrix = np.zeros((D, len(words)))
@@ -547,8 +430,5 @@ for b in range(len(tokens)):
 
         embed_etiq['chant']
 
-print(np.mean(np.array(score)))
 
-np.argsort(softmax_output)
-softmax_output[0][243]
-softmax_output[0].argsort()[-1]
+
