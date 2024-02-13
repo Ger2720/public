@@ -95,35 +95,26 @@ max_index_ori = len(values) - 1
 
 
 def extract_contexts_fully_random(tokens):
-    """
-    Extracts fully random contexts for each token in a list of tokens.
-    """
+
     contexts = {}
 
     for i, token in enumerate(tokens):
-        # Choisir une taille de contexte aléatoire
         context_size = random.randint(1, 10)
 
-        # Choisir un indice de début aléatoire qui précède le mot cible
         start_index = random.randint(0, max(0, i))
 
-        # Ajuster l'indice de début si nécessaire
         if i - start_index + 1 > context_size:
             start_index = i - context_size + 1
 
-        # Déterminer l'indice de fin
         end_index = start_index + context_size
 
-        # Ajuster si end_index dépasse la longueur des tokens
         if end_index > len(tokens):
             diff = end_index - len(tokens)
             start_index -= diff
             end_index -= diff
 
-        # Extraire le contexte sans inclure le mot cible
         context = tokens[start_index:i] + tokens[i + 1:end_index + 1]
 
-        # Associer le contexte à l'indice du mot cible dans le corpus
         contexts[i] = context
 
     return contexts
